@@ -1,8 +1,7 @@
 plugins {
     id 'java'
 }
-
-group 'org.example'
+group 'org.neller'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -12,8 +11,29 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    //ms-playwright
+    implementation 'com.microsoft.playwright:playwright:1.30.0'
+    // CalDAV handling: https://github.com/caldav4j/caldav4j
+    implementation 'com.github.caldav4j:caldav4j:0.9.2'
+    // pdf handling
+    implementation 'com.itextpdf:itext7-core:7.2.3'
+    implementation 'com.itextpdf:cleanup:3.0.1' // remove stuff from pdf
+
+    //testng, guice?
 }
 
 test {
     useJUnitPlatform()
+}
+
+/*
+    registers a gradle task called 'playwright' that allows for easy CLI execution using the -Pargs argument
+    example: ./gradlew playwright -Pargs="open --device='iPhone 11' wikipedia.org"
+ */
+tasks.register('playwright', JavaExec) {
+    mainClass = 'com.microsoft.playwright.CLI'
+    classpath sourceSets.main.runtimeClasspath
+    if (project.hasProperty('args')) {
+        args project.getProperty('args')
+    }
 }
