@@ -1,13 +1,24 @@
 package org.neller.schneller_invoice.conversion;
 
 
-import javax.print.attribute.IntegerSyntax;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
 
 public class NumbertoText{
-    public static void main(String[] args){
-        System.out.println(getText(5));
-        System.out.println(Ordinal.BILLION.toString());
-
+    public static void main(String[] args) throws IOException {
+        String url = "http://mobile.ding.eu/mobile/DMR?l=de&qr=1&n_dm=1200&m=d&n=din#";
+        Document doc = Jsoup.connect(url).get();
+        Elements departures = doc.select("tr.st_9001200");
+        for (Element ele : departures){
+            Element time = ele.select("td.clock").first();
+            System.out.print(time.text() + ": ");
+            Element line = ele.select("td.line").first();
+            System.out.println(line.text() );
+        }
     }
 
     public static String getText(int i){
@@ -15,29 +26,49 @@ public class NumbertoText{
     }
 
     public static String getText(Integer input){
-        //TODO handle negative numbers
+        if(input.equals(1)){
+            return "EINS";
+        }
+        String returnString = "";
         Integer integer = input.intValue();
         String integerString = integer.toString();
-        String returnString = "";
+
+        if(integerString.length()>=2 &&
+            integerString.endsWith("01")){
+           returnString = "EINS";
+        }
+
         int ordinal=0;
+        while(integerString.length()>0){
+            integer = Integer.valueOf(integerString);
+            returnString = getHundreds(integer % 1000) + Ordinal.values()[ordinal] + returnString;
+            ordinal++;
+            if(integerString.length()>=3){
+                integerString = integerString.substring(0,integerString.length()-3);
+            }
+            else{break;}
+        }
+        /*
         do{
             integer = Integer.valueOf(integerString);
             returnString= getHundreds(integer % 1000)+ Ordinal.values()[ordinal].toString()  + returnString;
             ordinal++;
-            if(integerString.length()>3){
+            if(integerString.length()>=3){
                 integerString = integerString.substring(0,integerString.length()-3);
             }
-        }while(integerString.length()>=3);
+        }while(integerString.length()>=1);
+         */
         return returnString;
     }
     private static String getHundreds(int i){
         String hundreds = "";
-        if(i >=100){
-            String s = Integer.toString(i);
-            int hundredDigit = s.charAt(s.length()-3);
-            hundreds = Digit.getUnd(hundredDigit) + "HUNDERT" ;
-        }
-        return hundreds + getTens(i % 100);
+
+        if(i<100) return getTens(i);
+        String s = Integer.toString(i);
+        int hundredDigit = Integer.valueOf(String.valueOf(s.charAt(s.length()-3)));
+
+        if(i%100==0) return Digit.getUnd(hundredDigit) + "HUNDERT";
+        return Digit.getUnd(hundredDigit)+ "HUNDERT" + getTens(i % 100);
     }
     private static String getTens(int i)  {
         //TODO throw error on > 99
@@ -54,7 +85,7 @@ public class NumbertoText{
     }
     private enum Digit{
         NULL,
-        EINS,
+        EIN,
         ZWEI,
         DREI,
         VIER,
@@ -96,7 +127,7 @@ public class NumbertoText{
 
         private final String multipleSuffix;
 
-        private Ordinal(String multipleSuffix) {
+        Ordinal(String multipleSuffix) {
             this.multipleSuffix = multipleSuffix;
         }
 

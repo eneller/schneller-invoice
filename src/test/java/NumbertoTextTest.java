@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neller.schneller_invoice.conversion.NumbertoText.getText;
 
@@ -7,6 +8,8 @@ public class NumbertoTextTest {
     public void testSingle(){
         assertEquals("FÜNF", getText(5));
     }
+    @Test
+    public void testOne(){assertEquals("EINS", getText(1));}
 
     @Test
     public void testSpecial(){
