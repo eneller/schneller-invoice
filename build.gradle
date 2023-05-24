@@ -13,6 +13,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     //ms-playwright
     implementation 'com.microsoft.playwright:playwright:1.30.0'
+    implementation 'org.jsoup:jsoup:1.15.4'
     // CalDAV handling: https://github.com/caldav4j/caldav4j
     implementation 'com.github.caldav4j:caldav4j:0.9.2'
     // pdf handling
@@ -27,13 +28,11 @@ test {
 }
 
 /*
-    registers a gradle task called 'playwright' that allows for easy CLI execution using the -Pargs argument
-    example: ./gradlew playwright -Pargs="open --device='iPhone 11' wikipedia.org"
+    registers a gradle task called 'playwright' that allows for easy CLI execution using the --args argument
+    example: ./gradlew playwright --args="open --device='iPhone 11' wikipedia.org"
  */
-tasks.register('playwright', JavaExec) {
-    mainClass = 'com.microsoft.playwright.CLI'
-    classpath sourceSets.main.runtimeClasspath
-    if (project.hasProperty('args')) {
-        args project.getProperty('args')
-    }
+task playwright(type: JavaExec) {
+  description = 'CLI for playwright. Use --args to pass arguments.'
+  mainClass = 'com.microsoft.playwright.CLI'
+  classpath sourceSets.main.runtimeClasspath  // or possibly sourceSets.test if Playwright is a test dependency only
 }
